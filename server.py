@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, flash
 
 app = Flask(__name__)
 app.secret_key = "My secret key"
@@ -9,17 +9,29 @@ def index():
 
 @app.route('/getInfo', methods=['POST'])
 def getInfo():
-    print "Got Info"
-    session['name'] = request.form['name']
+    # print "Got Info"
     session['local'] = request.form['dojoLocation']
     session['lang'] = request.form['favLanguage']
-    session['comment'] = request.form['comment']
+    if len(request.form['name'])<1:
+        flash("Name cannot be blank!")
+        return redirect('/')
+    else:
+        session['name'] = request.form['name']
+
+    if len(request.form['comment'])<1:
+        session['comment'] = "Hi there!!"
+    elif len(request.form['comment'])>121:
+        flash("Comments can only be 120 characters")
+        return redirect('/')
+    elif len(request.form['comment'])>1 and len(request.form['comment'])<121:
+        session['comment'] = request.form['comment']
+
 
     return redirect('/results')
 
 @app.route('/results')
 def results():
-    return redirect('/')
+    return render_template('results.html')
 
 
 
